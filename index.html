@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulador de Lançamento de OS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      /* Estilo para a fonte Inter */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6; /* Fundo cinza claro */
+      }
+      /* Estilo para animação suave */
+      .transition-all {
+        transition: all 0.3s ease-in-out;
+      }
+      /* Estilo para centralizar ícones */
+      .icon {
+        display: inline-block;
+        vertical-align: middle;
+        width: 1.2em; /* Tamanho do ícone */
+        height: 1.2em;
+        margin-right: 0.3em; /* Espaçamento à direita */
+      }
+      /* Estilo para destacar a OS ativa */
+      #os-display-section h2 {
+        border-left: 4px solid #3b82f6; /* Borda azul à esquerda */
+        padding-left: 0.75rem;
+      }
+      /* Estilo para botões */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.6rem 1.2rem;
+        border-radius: 0.375rem; /* Bordas arredondadas */
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+          0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      }
+      .btn-primary {
+        background-color: #3b82f6; /* Azul */
+        color: white;
+      }
+      .btn-primary:hover {
+        background-color: #2563eb;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+      .btn-secondary {
+        background-color: #6b7280; /* Cinza */
+        color: white;
+      }
+      .btn-secondary:hover {
+        background-color: #4b5563;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+      .btn-danger {
+        background-color: #ef4444; /* Vermelho */
+        color: white;
+      }
+      .btn-danger:hover {
+        background-color: #dc2626;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+      /* Estilo para a tabela */
+      th,
+      td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb; /* Linha divisória cinza */
+      }
+      th {
+        background-color: #f9fafb; /* Fundo levemente cinza para cabeçalho */
+        font-weight: 600;
+        color: #374151; /* Cor do texto do cabeçalho */
+      }
+      tbody tr:hover {
+        background-color: #f9fafb; /* Cor de fundo ao passar o mouse */
+      }
+      /* Estilo para inputs e selects */
+      input[type="text"],
+      input[type="date"],
+      input[type="time"],
+      select {
+        border-radius: 0.375rem;
+        border: 1px solid #d1d5db; /* Borda cinza */
+        padding: 0.5rem 0.75rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      input[type="text"]:focus,
+      input[type="date"]:focus,
+      input[type="time"]:focus,
+      select:focus {
+        outline: none;
+        border-color: #3b82f6; /* Borda azul ao focar */
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Sombra azul ao focar */
+      }
+      /* Mensagem de erro */
+      .error-message {
+        color: #ef4444; /* Vermelho */
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+      /* Container principal */
+      .main-container {
+        max-width: 64rem; /* Largura máxima */
+        margin: 2rem auto; /* Centraliza e adiciona margem */
+        padding: 2rem;
+        background-color: white;
+        border-radius: 0.5rem; /* Bordas arredondadas */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <h1 class="text-2xl font-bold mb-6 text-gray-800">
+        Simulador de Lançamento de OS
+      </h1>
+
+      <div
+        id="os-selection-section"
+        class="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50"
+      >
+        <label
+          for="os-number-input"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >Número da OS:</label
+        >
+        <div class="flex items-center space-x-2">
+          <input
+            type="text"
+            id="os-number-input"
+            name="os-number-input"
+            placeholder="Digite o número da OS"
+            class="flex-grow shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+          />
+          <button id="select-os-button" class="btn btn-primary">
+            <i data-lucide="log-in" class="icon"></i> Acessar OS
+          </button>
+        </div>
+        <p
+          id="os-selection-error"
+          class="error-message mt-2"
+          style="display: none"
+        ></p>
+      </div>
+
+      <div id="os-display-section" class="hidden transition-all">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-gray-700">
+            Detalhes da OS:
+            <span id="current-os-number" class="text-blue-600"></span>
+          </h2>
+          <button id="change-os-button" class="btn btn-secondary text-sm">
+            <i data-lucide="arrow-left-right" class="icon"></i> Trocar OS
+          </button>
+        </div>
+
+        <div class="mb-6 overflow-x-auto">
+          <table
+            class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg shadow-sm"
+          >
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Código do Funcionário
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Data da OS
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Horário Inicial
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Horário Final
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Ações
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              id="os-lines-table-body"
+              class="bg-white divide-y divide-gray-200"
+            >
+              <tr id="no-lines-row">
+                <td
+                  colspan="5"
+                  class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"
+                >
+                  Nenhum funcionário adicionado a esta OS ainda.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p-4 border border-gray-200 rounded-lg bg-gray-50">
+          <h3 class="text-lg font-medium text-gray-800 mb-3">
+            Adicionar Funcionário à OS
+          </h3>
+          <form
+            id="add-line-form"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end"
+          >
+            <div>
+              <label
+                for="employee-code"
+                class="block text-sm font-medium text-gray-700"
+                >Código Funcionário</label
+              >
+              <input
+                type="text"
+                id="employee-code"
+                name="employee-code"
+                required
+                class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label
+                for="os-date"
+                class="block text-sm font-medium text-gray-700"
+                >Data da OS</label
+              >
+              <input
+                type="date"
+                id="os-date"
+                name="os-date"
+                required
+                class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label
+                for="start-time"
+                class="block text-sm font-medium text-gray-700"
+                >Horário Inicial</label
+              >
+              <input
+                type="time"
+                id="start-time"
+                name="start-time"
+                required
+                class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label
+                for="end-time"
+                class="block text-sm font-medium text-gray-700"
+                >Horário Final</label
+              >
+              <input
+                type="time"
+                id="end-time"
+                name="end-time"
+                required
+                class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+              />
+            </div>
+            <div class="lg:mt-6">
+              <button type="submit" class="btn btn-primary w-full">
+                <i data-lucide="plus-circle" class="icon"></i> Adicionar Linha
+              </button>
+            </div>
+          </form>
+          <p
+            id="add-line-error"
+            class="error-message mt-2"
+            style="display: none"
+          ></p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- Elementos do DOM ---
+      const osSelectionSection = document.getElementById(
+        "os-selection-section"
+      );
+      const osDisplaySection = document.getElementById("os-display-section");
+      const osNumberInput = document.getElementById("os-number-input");
+      const selectOsButton = document.getElementById("select-os-button");
+      const changeOsButton = document.getElementById("change-os-button");
+      const currentOsNumberSpan = document.getElementById("current-os-number");
+      const osLinesTableBody = document.getElementById("os-lines-table-body");
+      const noLinesRow = document.getElementById("no-lines-row");
+      const addLineForm = document.getElementById("add-line-form");
+      const employeeCodeInput = document.getElementById("employee-code");
+      const osDateInput = document.getElementById("os-date");
+      const startTimeInput = document.getElementById("start-time");
+      const endTimeInput = document.getElementById("end-time");
+      const osSelectionError = document.getElementById("os-selection-error");
+      const addLineError = document.getElementById("add-line-error");
+
+      // --- Estado da Aplicação ---
+      let osData = {}; // Objeto para armazenar os dados das OS { "OS123": [ {linha1}, {linha2} ], ... }
+      let currentOs = null; // Armazena o número da OS atualmente selecionada
+
+      // --- Funções ---
+
+      // Carrega dados do localStorage ao iniciar
+      function loadData() {
+        const storedData = localStorage.getItem("osSimulatorData");
+        if (storedData) {
+          osData = JSON.parse(storedData);
+        }
+        // Define a data atual no campo de data por padrão
+        const today = new Date().toISOString().split("T")[0];
+        osDateInput.value = today;
+      }
+
+      // Salva dados no localStorage
+      function saveData() {
+        localStorage.setItem("osSimulatorData", JSON.stringify(osData));
+      }
+
+      // Limpa e exibe erros
+      function displayError(element, message) {
+        element.textContent = message;
+        element.style.display = message ? "block" : "none";
+      }
+
+      // Renderiza as linhas da OS na tabela
+      function renderOsLines() {
+        osLinesTableBody.innerHTML = ""; // Limpa a tabela
+        const lines = osData[currentOs] || [];
+
+        if (lines.length === 0) {
+          osLinesTableBody.appendChild(noLinesRow); // Mostra a mensagem "Nenhum funcionário"
+        } else {
+          // Ordena as linhas por código do funcionário para consistência
+          lines.sort((a, b) => a.employeeCode.localeCompare(b.employeeCode));
+
+          lines.forEach((line, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${
+                          line.employeeCode
+                        }</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(
+                          line.osDate
+                        )}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${
+                          line.startTime
+                        }</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${
+                          line.endTime
+                        }</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button class="text-red-600 hover:text-red-900 delete-line-btn" data-index="${index}">
+                                <i data-lucide="trash-2" class="icon"></i> Excluir
+                            </button>
+                        </td>
+                    `;
+            osLinesTableBody.appendChild(row);
+          });
+          // Adiciona event listeners aos botões de exclusão após renderizar
+          addDeleteButtonListeners();
+        }
+        // Atualiza os ícones do Lucide na tabela
+        lucide.createIcons();
+      }
+
+      // Formata a data para DD/MM/YYYY
+      function formatDate(dateString) {
+        if (!dateString) return "";
+        const [year, month, day] = dateString.split("-");
+        return `${day}/${month}/${year}`;
+      }
+
+      // Seleciona ou cria uma OS
+      function selectOs() {
+        const osNumber = osNumberInput.value.trim().toUpperCase(); // Padroniza para maiúsculas
+        displayError(osSelectionError, ""); // Limpa erro anterior
+
+        if (!osNumber) {
+          displayError(osSelectionError, "Por favor, digite o número da OS.");
+          osNumberInput.focus();
+          return;
+        }
+
+        currentOs = osNumber;
+        currentOsNumberSpan.textContent = currentOs;
+
+        // Cria a OS no objeto de dados se ela não existir
+        if (!osData[currentOs]) {
+          osData[currentOs] = [];
+          saveData(); // Salva a nova OS criada
+        }
+
+        renderOsLines(); // Renderiza as linhas (mesmo que vazias)
+
+        // Esconde a seção de seleção e mostra a seção de detalhes
+        osSelectionSection.classList.add("hidden");
+        osDisplaySection.classList.remove("hidden");
+        // Foca no primeiro campo do formulário de adicionar linha
+        employeeCodeInput.focus();
+      }
+
+      // Volta para a tela de seleção de OS
+      function changeOs() {
+        currentOs = null;
+        osDisplaySection.classList.add("hidden");
+        osSelectionSection.classList.remove("hidden");
+        osNumberInput.value = ""; // Limpa o input da OS
+        displayError(osSelectionError, ""); // Limpa qualquer erro
+        displayError(addLineError, ""); // Limpa erro do form
+        osNumberInput.focus();
+      }
+
+      // Adiciona uma nova linha à OS atual
+      function addLine(event) {
+        event.preventDefault(); // Previne o recarregamento da página
+        displayError(addLineError, ""); // Limpa erro anterior
+
+        const employeeCode = employeeCodeInput.value.trim();
+        const osDate = osDateInput.value;
+        const startTime = startTimeInput.value;
+        const endTime = endTimeInput.value;
+
+        // Validação simples
+        if (!employeeCode || !osDate || !startTime || !endTime) {
+          displayError(addLineError, "Todos os campos são obrigatórios.");
+          return;
+        }
+        // Validação Horário Final >= Horário Inicial
+        if (endTime < startTime) {
+          displayError(
+            addLineError,
+            "O Horário Final deve ser maior ou igual ao Horário Inicial."
+          );
+          return;
+        }
+
+        const newLine = {
+          employeeCode,
+          osDate,
+          startTime,
+          endTime,
+        };
+
+        // Adiciona a nova linha ao array da OS atual
+        osData[currentOs].push(newLine);
+        saveData(); // Salva os dados atualizados
+        renderOsLines(); // Re-renderiza a tabela
+
+        // Limpa o formulário
+        // addLineForm.reset(); // Reset pode limpar a data padrão, então limpamos manualmente
+        employeeCodeInput.value = "";
+        // Mantém a data
+        startTimeInput.value = "";
+        endTimeInput.value = "";
+
+        employeeCodeInput.focus(); // Foca no código do funcionário para a próxima entrada
+      }
+
+      // Adiciona listeners aos botões de exclusão
+      function addDeleteButtonListeners() {
+        const deleteButtons =
+          osLinesTableBody.querySelectorAll(".delete-line-btn");
+        deleteButtons.forEach((button) => {
+          // Remove listener antigo para evitar duplicação se a função for chamada múltiplas vezes
+          button.removeEventListener("click", handleDeleteLine);
+          // Adiciona o novo listener
+          button.addEventListener("click", handleDeleteLine);
+        });
+      }
+
+      // Função para lidar com a exclusão de linha
+      function handleDeleteLine(event) {
+        // Confirmação antes de excluir
+        if (!confirm("Tem certeza que deseja excluir esta linha?")) {
+          return;
+        }
+
+        const button = event.currentTarget; // O botão que foi clicado
+        const indexToDelete = parseInt(button.getAttribute("data-index"), 10); // Pega o índice da linha
+
+        if (
+          currentOs &&
+          osData[currentOs] &&
+          indexToDelete >= 0 &&
+          indexToDelete < osData[currentOs].length
+        ) {
+          // Remove a linha do array usando o índice
+          osData[currentOs].splice(indexToDelete, 1);
+          saveData(); // Salva os dados atualizados
+          renderOsLines(); // Re-renderiza a tabela para refletir a exclusão
+        } else {
+          console.error(
+            "Erro ao tentar excluir a linha: OS ou índice inválido."
+          );
+          displayError(
+            addLineError,
+            "Erro ao excluir a linha. Tente novamente."
+          );
+        }
+      }
+
+      // --- Event Listeners ---
+      selectOsButton.addEventListener("click", selectOs);
+      // Permite pressionar Enter no campo de OS para selecionar
+      osNumberInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          selectOs();
+        }
+      });
+      changeOsButton.addEventListener("click", changeOs);
+      addLineForm.addEventListener("submit", addLine);
+
+      // --- Inicialização ---
+      loadData(); // Carrega dados ao carregar a página
+      lucide.createIcons(); // Inicializa os ícones do Lucide
+    </script>
+  </body>
+</html>
