@@ -325,17 +325,6 @@
 
       // --- Funções ---
 
-      // Carrega dados do localStorage ao iniciar
-      function loadData() {
-        const storedData = localStorage.getItem("osSimulatorData");
-        if (storedData) {
-          osData = JSON.parse(storedData);
-        }
-        // Define a data atual no campo de data por padrão
-        const today = new Date().toISOString().split("T")[0];
-        osDateInput.value = today;
-      }
-
       // Salva dados no localStorage
       function saveData() {
         localStorage.setItem("osSimulatorData", JSON.stringify(osData));
